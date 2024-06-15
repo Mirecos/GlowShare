@@ -38,7 +38,7 @@ class LocalClient():
 
 
 
-        # fetch remote changes to local
+    # fetch remote changes to local
     def fetch(self):
         self.changes = self.__compare()
 
