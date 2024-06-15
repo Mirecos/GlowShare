@@ -1,6 +1,6 @@
 import os
-from diff_match_patch import diff_match_patch
 import json
+import io
 from datetime import datetime
 
 class FileManager():
@@ -10,16 +10,18 @@ class FileManager():
 
 
         # Represents a directory to a dictionary
-    def map_directory(self, path, path_from_root="./") -> dict:
+    def map_directory(self, path, path_from_root="./") -> dict[str, io.BufferedReader]:
         result = {}
         files = os.listdir(path)
 
         for file in files:
+            if file == '.gitignore':
+                continue
             fp = os.path.join(path, file)
 
             if os.path.isfile(fp):
                 with open(fp, "r") as f: 
-                    content = f.read()
+                    content = f.buffer.read()
                     result[os.path.join(path_from_root, file)] = content
 
             else:
@@ -29,7 +31,7 @@ class FileManager():
         return result
 
 
-    def compare_directories(self, local : dict, remote : dict):
+    def compare_directories(self, local : dict[str, io.BufferedReader], remote : dict[str, io.BufferedReader]):
         created_files = []
         modified_files = []
         deleted_files = []
@@ -66,6 +68,3 @@ class FileManager():
         snapshot = self.map_directory(path)
         with open(os.path.join('snapshots',fn), 'x') as f:
             json.dump(snapshot, f)
-
-    def save_snapshot(self):
-        pass

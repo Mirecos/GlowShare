@@ -21,7 +21,7 @@ class LocalClient():
 
 
 
-    # Compare local and remote
+    # Compare local with remote and print results
     def status(self):
         result = self.__compare()
         print("FileManager has found the following differences :")
@@ -72,7 +72,7 @@ class LocalClient():
                 print("Pulling from remote...")
                 self.pull()
             case "push":
-                print("Pushng to remote...")
+                print("Pushig to remote...")
                 self.push()
             case "stat":
                 print("Comparing from remote...")
