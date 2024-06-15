@@ -11,6 +11,7 @@ class LocalClient():
         self.cwd = cwd
         self.local_path = local_path
         self.remote_path = remote_path
+        self.changes = {}
 
 
 
@@ -39,14 +40,17 @@ class LocalClient():
 
         # fetch remote changes to local
     def fetch(self):
-        pass
+        self.changes = self.__compare()
 
 
 
     # pull content from fetched changes
     def pull(self):
+        if self.changes == {}: 
+            print("Your files are already up to date. You might need to fetch before pulling files.")
+            return
         self.fm.take_snapshot(self.local_path)
-        result = self.__compare()
+        result = self.changes
         for path in result["Deleted"]:
             local_fp = os.path.join(self.local_path, path)
             remote_fp = os.path.join(self.remote_path, path)
@@ -56,6 +60,7 @@ class LocalClient():
             local_fp = os.path.join(self.local_path, path)
             remote_fp = os.path.join(self.remote_path, path)
             shutil.copy(remote_fp, local_fp)
+        self.changes = {}
 
 
 
@@ -77,3 +82,6 @@ class LocalClient():
             case "stat":
                 print("Comparing from remote...")
                 self.status()
+            case "fetch":
+                print("Fetching from remote...")
+                self.fetch( )

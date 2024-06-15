@@ -2,6 +2,7 @@ import os
 import json
 import io
 from datetime import datetime
+import base64
 
 class FileManager():
 
@@ -20,8 +21,8 @@ class FileManager():
             fp = os.path.join(path, file)
 
             if os.path.isfile(fp):
-                with open(fp, "r") as f: 
-                    content = f.buffer.read()
+                with open(fp, "r") as f:
+                    content = base64.b64encode(f.buffer.read()).decode()
                     result[os.path.join(path_from_root, file)] = content
 
             else:
