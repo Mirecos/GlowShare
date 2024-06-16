@@ -2,12 +2,13 @@ import os
 import shutil
 from src.utils import clear
 from src.classes.FileManager import FileManager
+from src.classes.RemoteClient.LocalRemoteClient import LocalRemoteClient
 
 class LocalClient():
 
 
     def __init__(self, cwd, local_path, remote_path) -> None:
-        self.fm = FileManager()
+        self.fm = FileManager(LocalRemoteClient('./data_remote/'))
         self.cwd = cwd
         self.local_path = local_path
         self.remote_path = remote_path
@@ -17,7 +18,7 @@ class LocalClient():
 
     def __compare(self) -> dict:
         local_content = self.fm.map_directory(os.path.join(self.cwd, self.local_path))
-        remote_content = self.fm.map_directory(os.path.join(self.cwd, self.remote_path))
+        remote_content = self.fm.map_directory(os.path.join(self.cwd, self.remote_path), is_local=False)
         return self.fm.compare_directories(local_content, remote_content)
 
 
@@ -51,15 +52,10 @@ class LocalClient():
             return
         self.fm.take_snapshot(self.local_path)
         result = self.changes
-        for path in result["Deleted"]:
-            local_fp = os.path.join(self.local_path, path)
-            remote_fp = os.path.join(self.remote_path, path)
-            os.makedirs(os.path.dirname(local_fp), exist_ok=True)
-            shutil.copy(remote_fp, local_fp)
-        for path in result["Modified"]:
-            local_fp = os.path.join(self.local_path, path)
-            remote_fp = os.path.join(self.remote_path, path)
-            shutil.copy(remote_fp, local_fp)
+        for path_from_root in result["Deleted"]:
+            self.fm.overwrite_local_from_remote(path_from_root, self.local_path)
+        for path_from_root in result["Modified"]:
+            self.fm.overwrite_local_from_remote(path_from_root, self.local_path)
         self.changes = {}
 
 
@@ -84,4 +80,7 @@ class LocalClient():
                 self.status()
             case "fetch":
                 print("Fetching from remote...")
-                self.fetch( )
+                self.fetch()
+            case "test":
+                repr = self.fm.map_directory(os.path.join(self.cwd, self.remote_path))
+                self.fm.reset_current_files_to(repr)
